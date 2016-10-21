@@ -7,19 +7,20 @@
 //
 // The goal is to investigate the difference between non-tail recursive and tail recursive code
 // applied to (single) linked lists in C++.
-// The code merges two lists in a simpler non-tail recursive way and
-// a more complex tail, recursive way.
+// The code merges two lists in a simpler, non-tail recursive way, and
+// a more complex, tail recursive way.
 //
 // To measure the speed difference I use the chrono library.
-// On a MacbookPro8,3 Intel Core i7 2.4GHz 256kB L2 Cache/core 6MB L3 Cache 16GB RAM 1600MHz
-// it takes to create 
-
+// On a MacbookPro8,3 Intel Core i7 2.4GHz 256kB L2 Cache/core 6MB L3 Cache 16GB RAM 1600MHz.
+// It takes to create 300,000,000 nodes in two lists ~30 secs.
+// It takes to merge the two list using tail recursion ~3 secs (on one core, one thread).
 
 #include <iostream>
 #include <chrono>
 using namespace std;
 
 
+// Speed measuring utilities ##################################
 typedef std::chrono::high_resolution_clock::time_point TimeVar;
 
 #define duration(a) std::chrono::duration_cast<std::chrono::nanoseconds>(a).count()
@@ -31,9 +32,11 @@ double funcTime(F func, Args&&... args){
     func(std::forward<Args>(args)...);
     return duration(timeNow()-t1);
 }
+// ###########################################################
 
 
 
+// Linked lists ##############################################
 struct Node
 {
     int data;
@@ -91,7 +94,7 @@ Node * MergeListUtil(Node * accumHead, Node * accumTail, Node * headA, Node * he
     }
 }
 
-Node* MergeLists2(Node* headA, Node* headB)
+Node* MergeListTailRec(Node* headA, Node* headB)
 // Tail resursion w/ MergeListUtil() w/ accumHead and accumTail. Ugly way of creating accumHead and accumTail
 {
     if(headA && headB) // When both A and B contains data; 6 cases to prepare accumHead and accumTail
@@ -205,6 +208,7 @@ int main(int argc, const char * argv[]) {
     Node * oldNdA = listA;
     Node * oldNdB = listB;
     
+    // Create long list (e.g. 300,000,000 nodes)
     int nNode = 300000000;
     auto f = [nNode] (Node * oldNdA, Node * oldNdB) {
         for(int i=1; i < nNode; i++)
@@ -246,11 +250,11 @@ int main(int argc, const char * argv[]) {
     print(listA, 10000, 3); cout << endl;
     print(listB, 0, 3); cout << endl;
     
-    std::cout << "MergeList2 time: " << funcTime(MergeLists2,listA,listB) / 1000000000. << " sec" << endl;
+    std::cout << "MergeListTailRec time: " << funcTime(MergeListTailRec,listA,listB) / 1000000000. << " sec" << endl;
 //    std::cout << "MergeList time: " << funcTime(MergeLists,listA,listB) / 1000000000. << " sec" << endl;
     
     // Check out merged list
-//    Node * mList = MergeLists2(listA, listB);
+//    Node * mList = MergeListTailRec(listA, listB);
 //    cout << listLength(mList) << endl;
 //    print(mList, 0, 10);
     
